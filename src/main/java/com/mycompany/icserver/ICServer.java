@@ -1,7 +1,7 @@
 
 package com.mycompany.icserver;
 
-// A Java program for a Server
+
 import java.net.*;
 import java.io.*;
 import java.sql.Connection;
@@ -16,15 +16,14 @@ import java.util.logging.Logger;
 
 public class ICServer
 {
-    //initialize socket and input stream
+    //inicializa as sockets e as streams
     private Socket          socket   = null;
-    private Socket          outputSocket   = null;
     private ServerSocket    server   = null;
     private DataInputStream in       =  null;
     private DataOutputStream out = null;
-   // private Connection connection = null;
+    //private Connection connection = null;
  
-    // constructor with port
+    // construtor que inicializa a socket server
     public ICServer(int port)
     {
         
@@ -44,7 +43,7 @@ public class ICServer
         
         serverDefault();
     }
-    
+    //função que permanece ouvindo para novas conexões
     public void serverDefault(){
         
         String comandoBD = ""; 
@@ -61,7 +60,7 @@ public class ICServer
                     String[] comandoBDSplit = comandoBD.split(" ");
 
                     if ("INSERT".equals(comandoBDSplit[0])) {
-                        updateBD(comandoBD);
+                        createBD(comandoBD);
                     } else if ("SELECT".equals(comandoBDSplit[0])) {
                         String line = readBD(comandoBD, comandoBDSplit[3]);
                         out.writeUTF(line);
@@ -89,16 +88,29 @@ public class ICServer
         
     }
         
-       
     
-    /*public Connection getConnection(){
-        
-    }*/
-    
-    public void createBD() {
-        
+    //função que faz o comando INSERT para o Banco de Dados
+    public void createBD(String comandoBD) {
+        String url = "jdbc:mysql://localhost:3306/hospital";
+        String username = "java";
+        String password = "password";
+        System.out.println("Connecting database ...");
+
+        try (Connection connection = DriverManager.getConnection(url, username, password)) {
+            System.out.println("Database connected!");
+            
+            try {
+                Statement st = connection.createStatement();
+                st.executeUpdate(comandoBD);
+                
+            } catch (SQLException i) {
+                System.out.println(i);
+            }
+            } catch (SQLException e) {
+                throw new IllegalStateException("Cannot connect the database!", e);
+            }
     }
-    
+    // função que faz o comando SELECT para o Banco de Dados
     public String readBD(String comandoBD, String table) {
         String url = "jdbc:mysql://localhost:3306/hospital";
         String username = "java";
@@ -157,25 +169,8 @@ public class ICServer
             return registrosString;
     }
     
-    public void updateBD(String comandoBD) {
-        String url = "jdbc:mysql://localhost:3306/hospital";
-        String username = "java";
-        String password = "password";
-        System.out.println("Connecting database ...");
-
-        try (Connection connection = DriverManager.getConnection(url, username, password)) {
-            System.out.println("Database connected!");
-            
-            try {
-                Statement st = connection.createStatement();
-                st.executeUpdate(comandoBD);
-                
-            } catch (SQLException i) {
-                System.out.println(i);
-            }
-            } catch (SQLException e) {
-                throw new IllegalStateException("Cannot connect the database!", e);
-            }
+    public void updateBD() {
+        
             
     }
     
