@@ -19,62 +19,76 @@ import javax.swing.table.DefaultTableModel;
  * @author Enzo
  */
 public class ICClient extends javax.swing.JFrame {
-    
-     // initialize socket and input output streams
+
+    // initialize socket and input output streams
     private Socket socket = null;
     private DataInputStream input = null;
     private DataOutputStream out = null;
     private String address = "127.0.0.1";
     private int port = 5001;
-    
+
     private String login;
     private String senha;
     private String[][] usuariosBD = {
-            {"func1", "123", "0"},
-            {"func2", "456", "1"},
-            {"func3", "789", "2"}
-        };
-    
+        {"func1", "123", "0"},
+        {"func2", "456", "1"},
+        {"func3", "789", "2"}
+    };
+
     private List<String> obsLista = new ArrayList<String>();
-    
+
     /**
      * Creates new form Client
      */
     public ICClient() {
-        
-        int loginIndex = 0;
-        String mensagem = "";
-        boolean loginKey = true;
-        boolean loginEncontrado = false;
-        
-        while(loginKey == true) {
-            
-            login = JOptionPane.showInputDialog("Entre com seu login: ");
-            senha = JOptionPane.showInputDialog("Entre com sua senha: ");
-            
-            for (int i = 0; i < usuariosBD[0].length; i++) {
-                if (usuariosBD[i][0].equals(login)) {
-                    loginIndex = i;
-                    loginEncontrado = true;
-                }
+        boolean logiinkey = true;
+        while (logiinkey) {
+            login = JOptionPane.showInputDialog("Entre com seu login");
+            senha = JOptionPane.showInputDialog("Entre com sua senha");
+            String returnLine = "";
+            // establish a connection
+            try {
+                socket = new Socket(address, port);
+                System.out.println("Connfcted");
+
+                // takes input from terminal
+                input = new DataInputStream(
+                        new BufferedInputStream(socket.getInputStream()));
+
+                // sends output to the socket
+                out = new DataOutputStream(
+                        socket.getOutputStream());
+            } catch (IOException i) {
+                System.out.println(i);
+                return;
+            }
+            // string to read message from input
+            String line = "SELECT * FROM usuarios WHERE login='" + login + "' " + login + " " + senha + "";
+            System.out.println(line);
+            // keep reading until "Over" is input
+            try {
+                out.writeUTF(line);
+                returnLine = input.readUTF();
+                System.out.println("1");
+            } catch (IOException ex) {
+                Logger.getLogger(ICClient.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            // close the connection
+            try {
+                input.close();
+                out.close();
+                socket.close();
+            } catch (IOException i) {
+                System.out.println(i);
             }
             
-            if (loginEncontrado == true) {
-                if (usuariosBD[loginIndex][1].equals(senha)) {
-                    loginKey = false;
-                } else {
-                    mensagem = "Senha incorreta!";
-                }
-                
+            if ("ok".equals(returnLine)) {
+                logiinkey = false;
             } else {
-                mensagem = "Login não encontrado!";
-            }
-            
-            if (!mensagem.equals("")) {
-                JOptionPane.showMessageDialog(rootPane, mensagem);
+                JOptionPane.showMessageDialog(null, "Login ou senha incorretos");
             }
         }
-        
+
         initComponents();
     }
 
@@ -725,31 +739,27 @@ public class ICClient extends javax.swing.JFrame {
 
             // takes input from terminal
             input = new DataInputStream(
-                new BufferedInputStream(socket.getInputStream()));
+                    new BufferedInputStream(socket.getInputStream()));
 
             // sends output to the socket
             out = new DataOutputStream(
-                socket.getOutputStream());
-        }
-        catch (UnknownHostException u) {
+                    socket.getOutputStream());
+        } catch (UnknownHostException u) {
             System.out.println(u);
             return;
-        }
-        catch (IOException i) {
+        } catch (IOException i) {
             System.out.println(i);
             return;
         }
 
         // string to read message from input
-        String line = "INSERT INTO pacientes(CPF,pacienteNome,pacienteSobrenome) VALUES ('"+ CPF +"','"+ nome +"','"+ sobrenome +"')";
+        String line = "INSERT INTO pacientes(CPF,pacienteNome,pacienteSobrenome) VALUES ('" + CPF + "','" + nome + "','" + sobrenome + "')";
 
         // keep reading until "Over" is input
-
         try {
             //line = input.readLine();
             out.writeUTF(line);
-        }
-        catch (IOException i) {
+        } catch (IOException i) {
             System.out.println(i);
         }
 
@@ -758,8 +768,7 @@ public class ICClient extends javax.swing.JFrame {
             input.close();
             out.close();
             socket.close();
-        }
-        catch (IOException i) {
+        } catch (IOException i) {
             System.out.println(i);
         }
     }//GEN-LAST:event_btnCadastroActionPerformed
@@ -780,7 +789,7 @@ public class ICClient extends javax.swing.JFrame {
         String anoConsulta = cbxAnoConsulta.getSelectedItem().toString();
         String datetimeConsulta = anoConsulta + "-" + mesConsulta + "-" + diaConsulta + " " + LocalTime.now();
         String obs = txaObservacao.getText();
-        
+
         // establish a connection
         try {
             socket = new Socket(address, port);
@@ -791,23 +800,20 @@ public class ICClient extends javax.swing.JFrame {
 
             // sends output to the socket
             out = new DataOutputStream(
-                socket.getOutputStream());
-        }
-        catch (UnknownHostException u) {
+                    socket.getOutputStream());
+        } catch (UnknownHostException u) {
             System.out.println(u);
             return;
-        }
-        catch (IOException i) {
+        } catch (IOException i) {
             System.out.println(i);
             return;
         }
-        
-        String line = "INSERT INTO consultas(CPF,codigoMedico,dataConsulta,obs) VALUES ('"+ CPF +"','"+ codigoMedico +"','"+ datetimeConsulta +"','"+ obs+"')";
+
+        String line = "INSERT INTO consultas(CPF,codigoMedico,dataConsulta,obs) VALUES ('" + CPF + "','" + codigoMedico + "','" + datetimeConsulta + "','" + obs + "')";
 
         try {
             out.writeUTF(line);
-        }
-        catch (IOException i) {
+        } catch (IOException i) {
             System.out.println(i);
         }
 
@@ -815,8 +821,7 @@ public class ICClient extends javax.swing.JFrame {
             input.close();
             out.close();
             socket.close();
-        }
-        catch (IOException i) {
+        } catch (IOException i) {
             System.out.println(i);
         }
     }//GEN-LAST:event_btnConsultaActionPerformed
@@ -828,7 +833,7 @@ public class ICClient extends javax.swing.JFrame {
         String anoEntrada = cbxAnoEntrada.getSelectedItem().toString();
         String datetimeOcupacao = anoEntrada + "-" + mesEntrada + "-" + diaEntrada + " " + LocalTime.now();
         String numeroQuarto = cbxQuartoEntrada.getSelectedItem().toString();
-        
+
         // establish a connection
         try {
             socket = new Socket(address, port);
@@ -839,28 +844,22 @@ public class ICClient extends javax.swing.JFrame {
 
             // sends output to the socket
             out = new DataOutputStream(
-                socket.getOutputStream());
-        }
-        catch (UnknownHostException u) {
+                    socket.getOutputStream());
+        } catch (UnknownHostException u) {
             System.out.println(u);
             return;
-        }
-        catch (IOException i) {
+        } catch (IOException i) {
             System.out.println(i);
             return;
         }
-        
-        
-        // string to read message from input
-        String line = "INSERT INTO quartosOcupados(numeroQuarto,CPF,dataOcupacao) VALUES ('"+ numeroQuarto +"','"+ CPF +"','"+ datetimeOcupacao +"')";
 
-       
+        // string to read message from input
+        String line = "INSERT INTO quartosOcupados(numeroQuarto,CPF,dataOcupacao) VALUES ('" + numeroQuarto + "','" + CPF + "','" + datetimeOcupacao + "')";
 
         try {
             //line = input.readLine();
             out.writeUTF(line);
-        }
-        catch (IOException i) {
+        } catch (IOException i) {
             System.out.println(i);
         }
 
@@ -869,8 +868,7 @@ public class ICClient extends javax.swing.JFrame {
             input.close();
             out.close();
             socket.close();
-        }
-        catch (IOException i) {
+        } catch (IOException i) {
             System.out.println(i);
         }
     }//GEN-LAST:event_btnEntradaActionPerformed
@@ -882,7 +880,7 @@ public class ICClient extends javax.swing.JFrame {
         String anoSaida = cbxAnoSaida.getSelectedItem().toString();
         String datetimeOcupacao = anoSaida + "-" + mesSaida + "-" + diaSaida + " " + LocalTime.now();
         String numeroQuarto = cbxQuartoEntrada.getSelectedItem().toString();
-        
+
         // establish a connection
         try {
             socket = new Socket(address, port);
@@ -890,32 +888,27 @@ public class ICClient extends javax.swing.JFrame {
 
             // takes input from terminal
             input = new DataInputStream(
-                new BufferedInputStream(socket.getInputStream()));
+                    new BufferedInputStream(socket.getInputStream()));
 
             // sends output to the socket
             out = new DataOutputStream(
-                socket.getOutputStream());
-        }
-        catch (UnknownHostException u) {
+                    socket.getOutputStream());
+        } catch (UnknownHostException u) {
             System.out.println(u);
             return;
-        }
-        catch (IOException i) {
+        } catch (IOException i) {
             System.out.println(i);
             return;
         }
-        
-        
+
         // string to read message from input
-        String line = "INSERT INTO quartosOcupados(numeroQuarto,CPF,dataOcupacao) VALUES ('"+ numeroQuarto +"','"+ CPF +"','"+ datetimeOcupacao +"')";
+        String line = "INSERT INTO quartosOcupados(numeroQuarto,CPF,dataOcupacao) VALUES ('" + numeroQuarto + "','" + CPF + "','" + datetimeOcupacao + "')";
 
         // keep reading until "Over" is input
-
         try {
             //line = input.readLine();
             out.writeUTF(line);
-        }
-        catch (IOException i) {
+        } catch (IOException i) {
             System.out.println(i);
         }
 
@@ -924,8 +917,7 @@ public class ICClient extends javax.swing.JFrame {
             input.close();
             out.close();
             socket.close();
-        }
-        catch (IOException i) {
+        } catch (IOException i) {
             System.out.println(i);
         }
     }//GEN-LAST:event_btnSaidaActionPerformed
@@ -943,28 +935,27 @@ public class ICClient extends javax.swing.JFrame {
 
             // takes input from terminal
             input = new DataInputStream(
-                new BufferedInputStream(socket.getInputStream()));
+                    new BufferedInputStream(socket.getInputStream()));
 
             // sends output to the socket
             out = new DataOutputStream(
-                socket.getOutputStream());
-        }
-        catch (IOException i) {
+                    socket.getOutputStream());
+        } catch (IOException i) {
             System.out.println(i);
             return;
         }
         // string to read message from input
-        String line = "SELECT * FROM consultas WHERE CPF='"+txtCPFRegistro.getText()+"'";
+        String line = "SELECT * FROM consultas WHERE CPF='" + txtCPFRegistro.getText() + "'";
         System.out.println(line);
         // keep reading until "Over" is input
-        try {        
+        try {
             out.writeUTF(line);
             returnLine = input.readUTF();
-             System.out.println("1");
+            System.out.println("1");
         } catch (IOException ex) {
             Logger.getLogger(ICClient.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         String[] arrOfReturnLine = returnLine.split("=");
         System.out.println(returnLine);
         System.out.println(arrOfReturnLine[0]);
@@ -972,54 +963,53 @@ public class ICClient extends javax.swing.JFrame {
             String[] arrOfRegistrosConsultas = arrOfReturnLine[i].split("!");
             System.out.println(arrOfRegistrosConsultas[0]);
             DefaultTableModel modeloTabela = (DefaultTableModel) tblConsultas.getModel();
-            modeloTabela.addRow(new String[]{arrOfRegistrosConsultas[1],arrOfRegistrosConsultas[2]});
+            modeloTabela.addRow(new String[]{arrOfRegistrosConsultas[1], arrOfRegistrosConsultas[2]});
             obsLista.add(arrOfRegistrosConsultas[3]);
         }
-        
-        line = "SELECT * FROM pacientes WHERE CPF='"+txtCPFRegistro.getText()+"'";
+
+        line = "SELECT * FROM pacientes WHERE CPF='" + txtCPFRegistro.getText() + "'";
         System.out.println(line);
         // keep reading until "Over" is input
-        try {        
+        try {
             out.writeUTF(line);
             returnLine = input.readUTF();
-             System.out.println("1");
+            System.out.println("1");
         } catch (IOException ex) {
             Logger.getLogger(ICClient.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         String[] arrOfRegistrosPacientes = returnLine.split("!");
         txtNomeRegistro.setText(arrOfRegistrosPacientes[1]);
         txtSobrenomeRegistro.setText(arrOfRegistrosPacientes[2]);
-        
-        line = "SELECT * FROM quartosOcupados WHERE CPF='"+txtCPFRegistro.getText()+"'";
+
+        line = "SELECT * FROM quartosOcupados WHERE CPF='" + txtCPFRegistro.getText() + "'";
         System.out.println(line);
         // keep reading until "Over" is input
-        try {        
+        try {
             out.writeUTF(line);
             returnLine = input.readUTF();
-             System.out.println("1");
+            System.out.println("1");
         } catch (IOException ex) {
             Logger.getLogger(ICClient.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         String[] arrOfRegistrosQuartosOcupados = returnLine.split("!");
         txtQuartoRegistro.setText(arrOfRegistrosQuartosOcupados[0]);
         txtEntradaRegistro.setText(arrOfRegistrosQuartosOcupados[2]);
-        
+
         // close the connection
         try {
             input.close();
             out.close();
             socket.close();
-        }
-        catch (IOException i) {
+        } catch (IOException i) {
             System.out.println(i);
         }
     }//GEN-LAST:event_btnEnviarRegistroActionPerformed
 
     private void btnAbrirObsevacaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAbrirObsevacaoActionPerformed
         int indice = tblConsultas.getSelectedRow();
-        
+
         if (indice >= 0) {
             txaObservacaoRegistro.setText(obsLista.get(indice));
         } else {
@@ -1056,11 +1046,10 @@ public class ICClient extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-             new ICClient().setVisible(true);
-                
+                new ICClient().setVisible(true);
+
             }
         });
     }

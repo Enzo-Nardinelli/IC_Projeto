@@ -122,9 +122,26 @@ public class ICServer
             System.out.println("Database connected!");
             try {
                 Statement st = connection.createStatement();
-                ResultSet rs = st.executeQuery(comandoBD);
                
-                if ("consultas".equals(table)) {
+                if("usuarios".equals(table)){
+                    String[] usuarioCredencial = comandoBD.split(" ");
+                    String loginCredencial = usuarioCredencial[6];
+                    String senhaCredencial = usuarioCredencial[7];
+                    String novoComandoBD = usuarioCredencial[0] +" "+  usuarioCredencial[1] +" "+ usuarioCredencial[2]+" "+ usuarioCredencial[3] +" "+ usuarioCredencial[4] +" "+ usuarioCredencial[5];
+                    ResultSet rs = st.executeQuery(novoComandoBD);
+                    String login = "";
+                    String senha = "";
+                    while (rs.next()) {
+                    login = rs.getString("login");
+                    senha = rs.getString("senha");
+                    String codigoFuncao = rs.getString("codigoFuncao");
+                        if (login.equals(loginCredencial) && senha.equals(senhaCredencial)) {
+                            registros.add("ok");
+                            System.out.println("ok");
+                        }
+                    }
+                } else if ("consultas".equals(table)) {
+                    ResultSet rs = st.executeQuery(comandoBD);
                     while (rs.next()) {
                     String cpf = rs.getString("CPF");
                     String cdgMedico = rs.getString("codigoMedico");
@@ -134,6 +151,7 @@ public class ICServer
                     registros.add(cpf+"!"+cdgMedico+"!"+data+"!"+obs);
                     }
                 } else if ("pacientes".equals(table)) {
+                    ResultSet rs = st.executeQuery(comandoBD);
                     while (rs.next()) {
                     String cpf = rs.getString("CPF");
                     String pacienteNome = rs.getString("pacienteNome");
@@ -142,6 +160,7 @@ public class ICServer
                     registros.add(cpf+"!"+pacienteNome+"!"+pacienteSobrenome);
                     }
                 } else if ("quartosOcupados".equals(table)) {
+                    ResultSet rs = st.executeQuery(comandoBD);
                     while (rs.next()) {
                     String numeroQuarto = rs.getString("numeroQuarto");
                     String cpf = rs.getString("CPF");
@@ -163,7 +182,11 @@ public class ICServer
             //serverDefault();
         String registrosString = "";
         for (int i = 0; i < registros.size(); i++) {
-            registrosString += registros.get(i) + "=";
+            if (i != registros.size() - 1) {
+                registrosString += registros.get(i) + "=";
+            } else {
+                registrosString += registros.get(i);
+            }
         } 
             System.out.println(registrosString);
             return registrosString;
