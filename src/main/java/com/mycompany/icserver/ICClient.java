@@ -26,25 +26,17 @@ public class ICClient extends javax.swing.JFrame {
     private DataOutputStream out = null;
     private String address = "127.0.0.1";
     private int port = 5001;
-
-    private String login;
-    private String senha;
-    private String[][] usuariosBD = {
-        {"func1", "123", "0"},
-        {"func2", "456", "1"},
-        {"func3", "789", "2"}
-    };
+    
 
     private List<String> obsLista = new ArrayList<String>();
-
     /**
      * Creates new form Client
      */
     public ICClient() {
         boolean logiinkey = true;
         while (logiinkey) {
-            login = JOptionPane.showInputDialog("Entre com seu login");
-            senha = JOptionPane.showInputDialog("Entre com sua senha");
+            String login = JOptionPane.showInputDialog("Entre com seu login");
+            String senha = JOptionPane.showInputDialog("Entre com sua senha");
             String returnLine = "";
             // establish a connection
             try {
@@ -63,7 +55,7 @@ public class ICClient extends javax.swing.JFrame {
                 return;
             }
             // string to read message from input
-            String line = "SELECT * FROM usuarios WHERE login='" + login + "' " + login + " " + senha + "";
+            String line = "SELECT * FROM usuarios WHERE login='" + login + "' " + login + " " + senha + " Client";
             System.out.println(line);
             // keep reading until "Over" is input
             try {
@@ -82,10 +74,10 @@ public class ICClient extends javax.swing.JFrame {
                 System.out.println(i);
             }
             
-            if ("ok".equals(returnLine)) {
+            if ("1".equals(returnLine)) {
                 logiinkey = false;
             } else {
-                JOptionPane.showMessageDialog(null, "Login ou senha incorretos");
+                JOptionPane.showMessageDialog(null, "Credenciais incorretas ou inválidas");
             }
         }
 

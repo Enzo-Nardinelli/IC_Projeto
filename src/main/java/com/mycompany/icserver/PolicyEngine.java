@@ -1,0 +1,66 @@
+package com.mycompany.icserver;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+public class PolicyEngine {
+
+    private String login;
+    private String senha;
+    private String loginCredencial;
+    private String senhaCredencial;
+    private int codigoFuncao;
+    private String appAcesso;
+
+    public PolicyEngine(String comandoBD) {
+        String url = "jdbc:mysql://localhost:3306/hospital";
+        String username = "java";
+        String password = "password";
+        System.out.println("Connecting database ...");
+        List<String> registros = new ArrayList<String>();
+
+        try (Connection connection = DriverManager.getConnection(url, username, password)) {
+            System.out.println("Database connected!");
+            try {
+                Statement st = connection.createStatement();
+                String[] usuarioCredencial = comandoBD.split(" ");
+                login = usuarioCredencial[6];
+                senha = usuarioCredencial[7];
+                appAcesso = usuarioCredencial[8];
+                String novoComandoBD = usuarioCredencial[0] + " " + usuarioCredencial[1] + " " + usuarioCredencial[2] + " " + usuarioCredencial[3] + " " + usuarioCredencial[4] + " " + usuarioCredencial[5];
+                ResultSet rs = st.executeQuery(novoComandoBD);
+                while (rs.next()) {
+                    loginCredencial = rs.getString("login");
+                    senhaCredencial = rs.getString("senha");
+                    codigoFuncao = rs.getInt("codigoFuncao");
+                }
+            } catch (SQLException i) {
+                System.out.println(i);
+            }
+            System.out.println(comandoBD);
+            System.out.println("Closing connection");
+
+        } catch (SQLException e) {
+            throw new IllegalStateException("Cannot connect the database!", e);
+        }
+
+    }
+
+    public boolean permitir() {
+        boolean permissao = false;
+
+        if (login.equals(loginCredencial) && senha.equals(senhaCredencial)) {
+            if ("Client".equals(appAcesso)) {
+                if (codigoFuncao == 1 ) {
+                permissao = true;
+                }
+            }
+        }
+        return permissao;
+    }
+}
