@@ -16,6 +16,7 @@ public class PolicyEngine {
     private String senhaCredencial;
     private int codigoFuncao;
     private String appAcesso;
+    private String comandoBD;
 
     public PolicyEngine(String comandoBD) {
         String url = "jdbc:mysql://localhost:3306/hospital";
@@ -23,7 +24,8 @@ public class PolicyEngine {
         String password = "password";
         System.out.println("Connecting database ...");
         List<String> registros = new ArrayList<String>();
-
+        this.comandoBD = comandoBD; 
+        
         try (Connection connection = DriverManager.getConnection(url, username, password)) {
             System.out.println("Database connected!");
             try {
@@ -53,10 +55,11 @@ public class PolicyEngine {
 
     public boolean permitir() {
         boolean permissao = false;
-
+        comandoBD = "SELECT * FROM tokens WHERE login='" + login+ "'";
+        PolicyAdministrator pa = new PolicyAdministrator(login, comandoBD);
         if (login.equals(loginCredencial) && senha.equals(senhaCredencial)) {
             if ("Client".equals(appAcesso)) {
-                if (codigoFuncao == 1 ) {
+                if (codigoFuncao == 1 && pa.tokenVerificacao() == true) {
                 permissao = true;
                 }
             }

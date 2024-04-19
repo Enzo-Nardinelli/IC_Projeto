@@ -1,6 +1,4 @@
-
 package com.mycompany.icserver;
-
 
 import java.net.*;
 import java.io.*;
@@ -14,81 +12,74 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ICServer
-{
+public class ICServer {
+
     //inicializa as sockets e as streams
-    private Socket          socket   = null;
-    private ServerSocket    server   = null;
-    private DataInputStream in       =  null;
+    private Socket socket = null;
+    private ServerSocket server = null;
+    private DataInputStream in = null;
     private DataOutputStream out = null;
     //private Connection connection = null;
- 
+
     // construtor que inicializa a socket server
-    public ICServer(int port)
-    {
-        
+    public ICServer(int port) {
+
         // starts server and waits for a connection
-        try
-        {
+        try {
             server = new ServerSocket(port);
             System.out.println("Server started");
- 
+
             System.out.println("Waiting for a client ...");
- 
-        }
-        catch(IOException i)
-        {
+
+        } catch (IOException i) {
             System.out.println(i);
         }
-        
+
         serverDefault();
     }
+
     //função que permanece ouvindo para novas conexões
-    public void serverDefault(){
-        
-        String comandoBD = ""; 
+    public void serverDefault() {
+
+        String comandoBD = "";
         try {
-                while(true) {
-                    socket = server.accept();
- 
-                    // takes input from the client socket
-                    in = new DataInputStream(
+            while (true) {
+                socket = server.accept();
+
+                // takes input from the client socket
+                in = new DataInputStream(
                         new BufferedInputStream(socket.getInputStream()));
-                    out = new DataOutputStream(
+                out = new DataOutputStream(
                         socket.getOutputStream());
-                    comandoBD = in.readUTF();
-                    String[] comandoBDSplit = comandoBD.split(" ");
+                comandoBD = in.readUTF();
+                String[] comandoBDSplit = comandoBD.split(" ");
 
-                    if ("INSERT".equals(comandoBDSplit[0])) {
-                        createBD(comandoBD);
-                    } else if ("SELECT".equals(comandoBDSplit[0])) {
-                        String line = readBD(comandoBD, comandoBDSplit[3]);
-                        out.writeUTF(line);
-                        out.flush();
-                        System.out.println(line);
-                    }
-
-                    System.out.println(comandoBD);
-                    try {
-                        // close connection
-                        socket.close();
-                        in.close();
-                        out.close();
-                    } catch (IOException i) {
-                        System.out.println(i);
-                    }
+                if ("INSERT".equals(comandoBDSplit[0])) {
+                    createBD(comandoBD);
+                } else if ("SELECT".equals(comandoBDSplit[0])) {
+                    String line = readBD(comandoBD, comandoBDSplit[3]);
+                    out.writeUTF(line);
+                    out.flush();
+                    System.out.println(line);
                 }
-                
 
+                System.out.println(comandoBD);
+                try {
+                    // close connection
+                    socket.close();
+                    in.close();
+                    out.close();
+                } catch (IOException i) {
+                    System.out.println(i);
+                }
             }
-            catch(IOException i) {
-                System.out.println(i);
-            }
-        
-        
+
+        } catch (IOException i) {
+            System.out.println(i);
+        }
+
     }
-        
-    
+
     //função que faz o comando INSERT para o Banco de Dados
     public void createBD(String comandoBD) {
         String url = "jdbc:mysql://localhost:3306/hospital";
@@ -98,18 +89,19 @@ public class ICServer
 
         try (Connection connection = DriverManager.getConnection(url, username, password)) {
             System.out.println("Database connected!");
-            
+
             try {
                 Statement st = connection.createStatement();
                 st.executeUpdate(comandoBD);
-                
+
             } catch (SQLException i) {
                 System.out.println(i);
             }
-            } catch (SQLException e) {
-                throw new IllegalStateException("Cannot connect the database!", e);
-            }
+        } catch (SQLException e) {
+            throw new IllegalStateException("Cannot connect the database!", e);
+        }
     }
+
     // função que faz o comando SELECT para o Banco de Dados
     public String readBD(String comandoBD, String table) {
         String url = "jdbc:mysql://localhost:3306/hospital";
@@ -122,8 +114,8 @@ public class ICServer
             System.out.println("Database connected!");
             try {
                 Statement st = connection.createStatement();
-               
-                if("usuarios".equals(table)){
+
+                if ("usuarios".equals(table)) {
                     PolicyEngine pe = new PolicyEngine(comandoBD);
                     if (pe.permitir() == true) {
                         registros.add("1");
@@ -133,30 +125,30 @@ public class ICServer
                 } else if ("consultas".equals(table)) {
                     ResultSet rs = st.executeQuery(comandoBD);
                     while (rs.next()) {
-                    String cpf = rs.getString("CPF");
-                    String cdgMedico = rs.getString("codigoMedico");
-                    String data = rs.getString("dataConsulta");
-                    String obs = rs.getString("obs");
+                        String cpf = rs.getString("CPF");
+                        String cdgMedico = rs.getString("codigoMedico");
+                        String data = rs.getString("dataConsulta");
+                        String obs = rs.getString("obs");
 
-                    registros.add(cpf+"!"+cdgMedico+"!"+data+"!"+obs);
+                        registros.add(cpf + "!" + cdgMedico + "!" + data + "!" + obs);
                     }
                 } else if ("pacientes".equals(table)) {
                     ResultSet rs = st.executeQuery(comandoBD);
                     while (rs.next()) {
-                    String cpf = rs.getString("CPF");
-                    String pacienteNome = rs.getString("pacienteNome");
-                    String pacienteSobrenome = rs.getString("pacienteSobrenome");
+                        String cpf = rs.getString("CPF");
+                        String pacienteNome = rs.getString("pacienteNome");
+                        String pacienteSobrenome = rs.getString("pacienteSobrenome");
 
-                    registros.add(cpf+"!"+pacienteNome+"!"+pacienteSobrenome);
+                        registros.add(cpf + "!" + pacienteNome + "!" + pacienteSobrenome);
                     }
                 } else if ("quartosOcupados".equals(table)) {
                     ResultSet rs = st.executeQuery(comandoBD);
                     while (rs.next()) {
-                    String numeroQuarto = rs.getString("numeroQuarto");
-                    String cpf = rs.getString("CPF");
-                    String dataOcupacao = rs.getString("dataOcupacao");
+                        String numeroQuarto = rs.getString("numeroQuarto");
+                        String cpf = rs.getString("CPF");
+                        String dataOcupacao = rs.getString("dataOcupacao");
 
-                    registros.add(numeroQuarto+"!"+cpf+"!"+dataOcupacao);
+                        registros.add(numeroQuarto + "!" + cpf + "!" + dataOcupacao);
                     }
                 }
             } catch (SQLException i) {
@@ -164,12 +156,12 @@ public class ICServer
             }
             System.out.println(comandoBD);
             System.out.println("Closing connection");
-            
-            } catch (SQLException e) {
-                throw new IllegalStateException("Cannot connect the database!", e);
-            }
-            
-            //serverDefault();
+
+        } catch (SQLException e) {
+            throw new IllegalStateException("Cannot connect the database!", e);
+        }
+
+        //serverDefault();
         String registrosString = "";
         for (int i = 0; i < registros.size(); i++) {
             if (i != registros.size() - 1) {
@@ -177,22 +169,20 @@ public class ICServer
             } else {
                 registrosString += registros.get(i);
             }
-        } 
-            System.out.println(registrosString);
-            return registrosString;
+        }
+        System.out.println(registrosString);
+        return registrosString;
     }
-    
+
     public void updateBD() {
-        
-            
+
     }
-    
+
     public void deleteBD() {
-        
+
     }
- 
-    public static void main(String args[])
-    {
+
+    public static void main(String args[]) {
         ICServer server = new ICServer(5001);
     }
 }
