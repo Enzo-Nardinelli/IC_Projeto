@@ -41,7 +41,7 @@ public class ICClient extends javax.swing.JFrame {
             // establish a connection
             try {
                 socket = new Socket(address, port);
-                System.out.println("Connfcted");
+                System.out.println("Connected");
 
                 // takes input from terminal
                 input = new DataInputStream(

@@ -27,7 +27,7 @@ public class PolicyAdministrator {
 
     public boolean tokenVerificacao() {
         ResultSet rs = null;
-        boolean registoVazio = false;
+        boolean registroVazio = false;
         String url = "jdbc:mysql://localhost:3306/hospital";
         String username = "java";
         String password = "password";
@@ -45,7 +45,8 @@ public class PolicyAdministrator {
         try (Connection connection = DriverManager.getConnection(url, username, password)) {
             System.out.println("Database connected!");
             try {
-                Statement st = connection.createStatement();
+                Statement st = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                  ResultSet.CONCUR_UPDATABLE);
                 rs = st.executeQuery(comandoBD);
                 rs.last();
                 token = rs.getString("token");
@@ -55,13 +56,13 @@ public class PolicyAdministrator {
             } catch (SQLException i) {
                 System.out.println(i);
                 System.out.println("Não há token registrados por esse login");
-                registoVazio = true;
+                registroVazio = true;
             }
 
         } catch (SQLException e) {
             throw new IllegalStateException("Cannot connect the database!", e);
         }
-
+        System.out.println(registroVazio);
         if (!"".equals(validade)) {
             System.out.println(validade + "oioi");
             String[] validadeFormatada = validade.split(" ");
@@ -72,20 +73,16 @@ public class PolicyAdministrator {
             diff = ldt1.compareTo(ldt2);
         }
 
-        if (diff > 0 || registoVazio == true) { // bug aqui
+        if (diff < 0 || registroVazio == true) { // bug aqui 
             novoToken = generateNewToken();
             System.out.println("Token gerado!");
         }
 
-        String line = "";
+        
 
         if (!"".equals(novoToken)) {
-            line = "INSERT INTO tokens(token,validade,login) VALUES ('" + novoToken + "','" + LocalDateTime.now().plusHours(12) + "','" + login + "')";
-        } else {
-            retorno = true; //token existente ainda está dentro da validade
-        }
-
-        try (Connection connection = DriverManager.getConnection(url, username, password)) {
+            String line = "INSERT INTO tokens(token,validade,login) VALUES ('" + novoToken + "','" + LocalDateTime.now().plusHours(12) + "','" + login + "')";
+            try (Connection connection = DriverManager.getConnection(url, username, password)) {
             System.out.println("Database connected!");
 
             try {
@@ -99,6 +96,12 @@ public class PolicyAdministrator {
         } catch (SQLException e) {
             throw new IllegalStateException("Cannot connect the database!", e);
         }
+        } else {
+            System.out.println("token existente ainda está dentro da validade");
+            retorno = true; //token existente ainda está dentro da validade
+        }
+
+       
         return retorno;
     }
 
