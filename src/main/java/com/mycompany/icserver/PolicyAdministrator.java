@@ -74,7 +74,7 @@ public class PolicyAdministrator {
         }
 
         if (diff < 0 || registroVazio == true) { // bug aqui 
-            novoToken = generateNewToken();
+            novoToken = gerarNovoToken();
             System.out.println("Token gerado!");
         }
 
@@ -105,7 +105,7 @@ public class PolicyAdministrator {
         return retorno;
     }
 
-    public static String generateNewToken() {
+    public static String gerarNovoToken() {
         byte[] randomBytes = new byte[24];
         secureRandom.nextBytes(randomBytes);
         return base64Encoder.encodeToString(randomBytes);

@@ -7,6 +7,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -35,16 +37,17 @@ public class ICServer {
             System.out.println(i);
         }
 
-        serverDefault();
+        policyEnforcementPoint();
     }
 
     //função que permanece ouvindo para novas conexões
-    public void serverDefault() {
+    public void policyEnforcementPoint() {
 
         String comandoBD = "";
         try {
             while (true) {
                 socket = server.accept();
+                String line = "";
 
                 // takes input from the client socket
                 in = new DataInputStream(
@@ -57,13 +60,23 @@ public class ICServer {
                 if ("INSERT".equals(comandoBDSplit[0])) {
                     createBD(comandoBD);
                 } else if ("SELECT".equals(comandoBDSplit[0])) {
-                    String line = readBD(comandoBD, comandoBDSplit[3]);
+                    line = readBD(comandoBD, comandoBDSplit[3]);
                     out.writeUTF(line);
                     out.flush();
                     System.out.println(line);
                 }
-
-                System.out.println(comandoBD);
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+                LocalDateTime now = LocalDateTime.now();
+                if ("INSERT".equals(comandoBDSplit[0])) {
+                    createBD("INSERT INTO acessos(data,ip,infoAcesso) VALUES ('" + dtf.format(now)
+                            + "','" + socket.getRemoteSocketAddress().toString()
+                            + "','" + comandoBDSplit[2] + " " + line + "')");
+                } else if ("SELECT".equals(comandoBDSplit[0])){
+                    createBD("INSERT INTO acessos(data,ip,infoAcesso) VALUES ('" + dtf.format(now)
+                            + "','" + socket.getRemoteSocketAddress().toString()
+                            + "','" + comandoBDSplit[3] + " " + line + "')");
+                }
+                System.out.println(comandoBDSplit[3]);
                 try {
                     // close connection
                     socket.close();
@@ -117,7 +130,7 @@ public class ICServer {
 
                 if ("usuarios".equals(table)) {
                     PolicyEngine pe = new PolicyEngine(comandoBD);
-                    if (pe.permitir() == true) {
+                    if (pe.permitirAcesso() == true) {
                         registros.add("1");
                     } else {
                         registros.add("0");

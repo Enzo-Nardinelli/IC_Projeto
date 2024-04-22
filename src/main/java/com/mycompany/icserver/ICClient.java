@@ -801,7 +801,7 @@ public class ICClient extends javax.swing.JFrame {
             return;
         }
 
-        String line = "INSERT INTO consultas(CPF,codigoMedico,dataConsulta,obs) VALUES ('" + CPF + "','" + codigoMedico + "','" + datetimeConsulta + "','" + obs + "')";
+        String line = "INSERT INTO consultas (CPF,codigoMedico,dataConsulta,obs) VALUES ('" + CPF + "','" + codigoMedico + "','" + datetimeConsulta + "','" + obs + "')";
 
         try {
             out.writeUTF(line);

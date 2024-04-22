@@ -53,7 +53,7 @@ public class PolicyEngine {
 
     }
 
-    public boolean permitir() {
+    public boolean permitirAcesso() {
         boolean permissao = false;
         comandoBD = "SELECT * FROM tokens WHERE login='" + login+ "'";
         PolicyAdministrator pa = new PolicyAdministrator(login, comandoBD);
