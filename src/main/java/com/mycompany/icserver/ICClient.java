@@ -26,6 +26,7 @@ public class ICClient extends javax.swing.JFrame {
     private DataOutputStream out = null;
     private String address = "127.0.0.1";
     private int port = 5001;
+    private String token;
     
 
     private List<String> obsLista = new ArrayList<String>();
@@ -73,9 +74,11 @@ public class ICClient extends javax.swing.JFrame {
             } catch (IOException i) {
                 System.out.println(i);
             }
-            
-            if ("1".equals(returnLine)) {
+            String[] returnLineSplit = returnLine.split(" ");
+            if ("1".equals(returnLineSplit[0])) {
                 logiinkey = false;
+                token = returnLineSplit[1];
+                System.out.println(token);
             } else {
                 JOptionPane.showMessageDialog(null, "Credenciais incorretas ou inválidas");
             }

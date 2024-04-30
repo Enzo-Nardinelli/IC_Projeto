@@ -36,7 +36,9 @@ public class ICServer {
         } catch (IOException i) {
             System.out.println(i);
         }
-
+        ProcessHandle.allProcesses().forEach(processHandle
+                -> System.out.println("PID: " + processHandle.pid()
+                        + ", command: " + processHandle.info().command().orElse("Unknown")));
         policyEnforcementPoint();
     }
 
@@ -71,7 +73,7 @@ public class ICServer {
                     createBD("INSERT INTO acessos(data,ip,infoAcesso) VALUES ('" + dtf.format(now)
                             + "','" + socket.getRemoteSocketAddress().toString()
                             + "','" + comandoBDSplit[2] + " " + line + "')");
-                } else if ("SELECT".equals(comandoBDSplit[0])){
+                } else if ("SELECT".equals(comandoBDSplit[0])) {
                     createBD("INSERT INTO acessos(data,ip,infoAcesso) VALUES ('" + dtf.format(now)
                             + "','" + socket.getRemoteSocketAddress().toString()
                             + "','" + comandoBDSplit[3] + " " + line + "')");
@@ -129,9 +131,10 @@ public class ICServer {
                 Statement st = connection.createStatement();
 
                 if ("usuarios".equals(table)) {
-                    PolicyEngine pe = new PolicyEngine(comandoBD);
-                    if (pe.permitirAcesso() == true) {
-                        registros.add("1");
+                    String token ="";
+                    PolicyEngine pe = new PolicyEngine(token, comandoBD);
+                    if (pe.permitirAcessoUsuario()== true) {
+                        registros.add("1" + " " + pe.retornarToken());
                     } else {
                         registros.add("0");
                     }
